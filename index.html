@@ -7,22 +7,33 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #000000;
+      background-color: #262626;
       margin: 0;
       padding: 20px;
       text-align: center;
       color: #fff;
     }
 
-    h1, h2, h3 {
+    h1, h3 {
       margin: 0;
       color: #d60000;
-      text-shadow: 1px 1px 2px #00000020;
+      text-shadow: 2px 2px 4px #00000020;
+    }
+    h2 {
+      margin: 0;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px #ff0000;
+    }
+    h4 {
+      margin: 0;
+      color: #ffffff;
+      text-shadow: 2px 2px 4px #ff0000e8;
     }
 
     h1 { font-size: 30px; font-weight: 700; }
-    h2 { font-size: 35px; font-weight: 700; margin-top: 10px; }
-    h3 { font-size: 25px; font-weight: 600; margin-top: 15px; margin-bottom: 25px; }
+    h2 { font-size: 35px; font-weight: 700; margin-top: 5px; }
+    h3 { font-size: 25px; font-weight: 600; margin-top: 5px; margin-bottom: 25px; }
+    h4 { font-size: 25px; font-weight: 600; margin-top: 5px; margin-bottom: 5px; }
 
     .legend {
       display: flex;
@@ -66,7 +77,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgb(255, 255, 255);
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
     }
 
@@ -116,24 +127,25 @@
     /* Availability Table */
     table {
       border-collapse: collapse;
-      width: 1500px;
-      margin: 30px auto;
+      width: 1200px;
+      margin: 5px auto;
       background: #fff;
       color: #000;
-      border: 2px solid #d60000;
+      border: 5px solid #ffffff;
     }
 
     th, td {
-      border: 1px solid #d60000;
-      padding: 10px;
+      border: 1px solid #000280;
+      padding: 3px;
       text-align: center;
       font-weight: 600;
     }
 
     th {
-      background-color: #d60000;
+      background-color: #000280;
       color: white;
       font-size: 25px;
+      text-shadow: 2px 2px 4px #000000e8;
     }
 
     td {
@@ -278,8 +290,8 @@
   </style>
 </head>
 <body>
-  <h1>KAMOA COPPER SA - SMELTER</h1>
   <h2>MOBILE EQUIPMENT AVAILABILITY INTERACTIVE DASHBOARD</h2>
+  <h1>KAMOA COPPER SA - SMELTER</h1>
   <h3>Control Centre & Coordination</h3>
 
   <div class="legend">
@@ -295,19 +307,19 @@
     <button onclick="filterBadges('down')">Show Down</button>
   </div>
 
-  <h3>FORKLIFT</h3>
+  <h4>FORKLIFT</h4>
   <div class="dashboard" id="forklift-dashboard"></div>
 
-  <h3>FRONT END LOADER</h3>
+  <h4>FRONT END LOADER</h4>
   <div class="dashboard" id="fel-dashboard"></div>
 
-  <h3>DUMP TRUCK, FUEL BOWSER & LIFT TRUCK</h3>
+  <h4>DUMP TRUCK, FUEL BOWSER & LIFT TRUCK</h4>
   <div class="dashboard" id="dumptruck-dashboard"></div>
 
-  <h3>SLAG POT CARRIER</h3>
+  <h4>SLAG POT CARRIER</h4>
   <div class="dashboard" id="spc-dashboard"></div>
 
-  <h3>EXCAVATOR & BREAKER EXCAVATOR</h3>
+  <h4>EXCAVATOR & BREAKER EXCAVATOR</h4>
   <div class="dashboard" id="excavator-dashboard"></div>
 
   <!-- REAL TIME AVAILABILITY TABLE -->
@@ -887,23 +899,5 @@
 
     updateAvailabilityTable();
   </script>
-  // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAEUkHBDzJD-gDQsrDD6DJZqBfwsb_eyKE",
-  authDomain: "dashboard-meaid.firebaseapp.com",
-  projectId: "dashboard-meaid",
-  storageBucket: "dashboard-meaid.firebasestorage.app",
-  messagingSenderId: "7312241567",
-  appId: "1:7312241567:web:9e770fdfc2bc0f83fac3aa"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 </body>
-
 </html>
