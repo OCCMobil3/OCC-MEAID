@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAMOA COPPER SA - MOBILE EQUIPMENT DASHBOARD</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #000000;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      color: #d60000;
+      text-shadow: 1px 1px 2px #00000020;
+    }
+
+    h1 { font-size: 30px; font-weight: 700; }
+    h2 { font-size: 35px; font-weight: 700; margin-top: 10px; }
+    h3 { font-size: 25px; font-weight: 600; margin-top: 15px; margin-bottom: 25px; }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      background: #ffffff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: fit-content;
+      margin: 0 auto 20px;
+      color: #000;
+    }
+
+    .legend div { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+    .dot { width: 18px; height: 18px; border-radius: 50%; }
+    .available { background-color: #3cb043; }
+    .reported { background-color: #f5c63b; }
+    .down { background-color: #e43d3d; }
+
+    .filter-buttons { margin-bottom: 15px; }
+    .filter-buttons button {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 8px 14px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .filter-buttons button:hover { background: #444; color: #fff; }
+
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      background: #000000;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgb(255, 255, 255);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      border-radius: 30px;
+      padding: 8px 15px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s;
+      box-shadow: inset -2px -3px 5px rgba(0,0,0,0.2),
+                  inset 2px 3px 8px rgba(255,255,255,0.4),
+                  0 4px 6px rgba(0,0,0,0.15);
+      font-size: clamp(0.6rem, 0.8vw, 0.85rem);
+      white-space: nowrap;
+    }
+    .badge::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.8);
+    }
+
+    .badge.available-badge::before { background: #3cb043; }
+    .badge.reported-badge::before { background: #f5c63b; }
+    .badge.down-badge::before { background: #e43d3d; }
+
+    .available-badge {
+      background: linear-gradient(145deg, #41c24b, #36a53e);
+    }
+    .reported-badge {
+      background: linear-gradient(145deg, #ffd84d, #eab933);
+      color: #000;
+    }
+    .down-badge {
+      background: linear-gradient(145deg, #f54e4e, #c93333);
+    }
+
+    .badge:hover { transform: scale(1.05); }
+
+    /* Availability Table */
+    table {
+      border-collapse: collapse;
+      width: 1500px;
+      margin: 30px auto;
+      background: #fff;
+      color: #000;
+      border: 2px solid #d60000;
+    }
+
+    th, td {
+      border: 1px solid #d60000;
+      padding: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    th {
+      background-color: #d60000;
+      color: white;
+      font-size: 25px;
+    }
+
+    td {
+      font-size: 20px;
+    }
+
+    /* User Form Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      color: #000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 500px;
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .status-options {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .status-option {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .status-option.selected {
+      border-color: #d60000;
+      background-color: #f9f9f9;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+      background-color: #d60000;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #b30000;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+      margin-right: 10px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+
+    .form-title {
+      color: #d60000;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    .password-prompt {
+      text-align: center;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .password-prompt input {
+      margin: 10px 0;
+      padding: 8px;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    .password-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>KAMOA COPPER SA - SMELTER</h1>
+  <h2>MOBILE EQUIPMENT AVAILABILITY INTERACTIVE DASHBOARD</h2>
+  <h3>Control Centre & Coordination</h3>
+
+  <div class="legend">
+    <div><div class="dot available"></div> Available</div>
+    <div><div class="dot reported"></div> Reported</div>
+    <div><div class="dot down"></div> Down</div>
+  </div>
+
+  <div class="filter-buttons">
+    <button onclick="filterBadges('all')">Show All</button>
+    <button onclick="filterBadges('available')">Show Available</button>
+    <button onclick="filterBadges('reported')">Show Reported</button>
+    <button onclick="filterBadges('down')">Show Down</button>
+  </div>
+
+  <h3>FORKLIFT</h3>
+  <div class="dashboard" id="forklift-dashboard"></div>
+
+  <h3>FRONT END LOADER</h3>
+  <div class="dashboard" id="fel-dashboard"></div>
+
+  <h3>DUMP TRUCK, FUEL BOWSER & LIFT TRUCK</h3>
+  <div class="dashboard" id="dumptruck-dashboard"></div>
+
+  <h3>SLAG POT CARRIER</h3>
+  <div class="dashboard" id="spc-dashboard"></div>
+
+  <h3>EXCAVATOR & BREAKER EXCAVATOR</h3>
+  <div class="dashboard" id="excavator-dashboard"></div>
+
+  <!-- REAL TIME AVAILABILITY TABLE -->
+  <h2>"REAL TIME AVAILABILITY"</h2>
+  <table id="availability-table">
+    <thead>
+      <tr>
+        <th>EQUIPMENT TYPE</th>
+        <th>NO. OF UNITS</th>
+        <th>AVAILABLE UNITS</th>
+        <th>DOWN UNITS</th>
+        <th>EQUIPMENT AVAILABILITY</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <!-- Available User Form -->
+  <div id="userform-available" class="modal">
+    <div class="modal-content">
+      <h3 class="form-title">Update Equipment Status</h3>
+      <form id="form-available">
+        <div class="form-group">
+          <label for="mobileEquipmentType">Mobile Equipment Type:</label>
+          <input type="text" id="mobileEquipmentType" readonly>
+        </div>
+        <div class="form-group">
+          <label for="mobileEquipmentCode">Mobile Equipment Code:</label>
+          <input type="text" id="mobileEquipmentCode" readonly>
+        </div>
+        <div class="form-group">
+          <label for="currentStatus">Current Status:</label>
+          <input type="text" id="currentStatus" readonly>
+        </div>
+        <div class="form-group">
+          <label for="currentAreaAssignment">Current Area Assignment:</label>
+          <input type="text" id="currentAreaAssignment">
+        </div>
+        <div class="form-group">
+          <label for="updateAreaAssignment">Update Area Assignment:</label>
+          <input type="text" id="updateAreaAssignment">
+        </div>
+        <div class="form-group">
+          <label>Update Mobile Equipment Status:</label>
+          <div class="status-options" id="available-status-options">
+            <div class="status-option selected" data-status="available">Available</div>
+            <div class="status-option" data-status="reported">Reported</div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeUserForm('available')">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveAvailableForm()">SAVE UPDATE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reported User Form -->
+  <div id="userform-reported" class="modal">
+    <div class="modal-content">
+      <h3 class="form-title">Update Equipment Status</h3>
+      <form id="form-reported">
+        <div class="form-group">
+          <label for="mobileEquipmentTypeReported">Mobile Equipment Type:</label>
+          <input type="text" id="mobileEquipmentTypeReported" readonly>
+        </div>
+        <div class="form-group">
+          <label for="mobileEquipmentCodeReported">Mobile Equipment Code:</label>
+          <input type="text" id="mobileEquipmentCodeReported" readonly>
+        </div>
+        <div class="form-group">
+          <label for="currentStatusReported">Current Status:</label>
+          <input type="text" id="currentStatusReported" readonly>
+        </div>
+        <div class="form-group">
+          <label for="equipmentIssueDetails">Equipment Issue Details:</label>
+          <textarea id="equipmentIssueDetails" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="reportedBy">Reported By:</label>
+          <input type="text" id="reportedBy" required>
+        </div>
+        <div class="form-group">
+          <label for="reportedDate">Reported Date:</label>
+          <input type="date" id="reportedDate" required>
+        </div>
+        <div class="form-group">
+          <label>Update Mobile Equipment Status:</label>
+          <div class="status-options" id="reported-status-options">
+            <div class="status-option" data-status="available">Available</div>
+            <div class="status-option selected" data-status="reported">Reported</div>
+            <div class="status-option" data-status="down">Down</div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeUserForm('reported')">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveReportedForm()">SAVE UPDATE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Down User Form -->
+  <div id="userform-down" class="modal">
+    <div class="modal-content">
+      <h3 class="form-title">Update Equipment Status</h3>
+      <form id="form-down">
+        <div class="form-group">
+          <label for="mobileEquipmentTypeDown">Mobile Equipment Type:</label>
+          <input type="text" id="mobileEquipmentTypeDown" readonly>
+        </div>
+        <div class="form-group">
+          <label for="mobileEquipmentCodeDown">Mobile Equipment Code:</label>
+          <input type="text" id="mobileEquipmentCodeDown" readonly>
+        </div>
+        <div class="form-group">
+          <label for="currentStatusDown">Current Status:</label>
+          <input type="text" id="currentStatusDown" readonly>
+        </div>
+        <div class="form-group">
+          <label for="verifiedEquipmentIssueDetails">Verified Equipment Issue Details:</label>
+          <textarea id="verifiedEquipmentIssueDetails" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="verifiedBy">Verified By:</label>
+          <input type="text" id="verifiedBy" required>
+        </div>
+        <div class="form-group">
+          <label for="verifiedDate">Verified Date:</label>
+          <input type="date" id="verifiedDate" required>
+        </div>
+        <div class="form-group">
+          <label for="daysDown">No. of Days Down:</label>
+          <input type="text" id="daysDown" readonly>
+        </div>
+        <div class="form-group">
+          <label>Update Mobile Equipment Status:</label>
+          <div class="status-options" id="down-status-options">
+            <div class="status-option" data-status="available">Available</div>
+            <div class="status-option selected" data-status="down">Down</div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeUserForm('down')">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveDownForm()">SAVE UPDATE</button>
+        </div>
+        
+        <!-- Password Prompt Section (initially hidden) -->
+        <div id="password-prompt" class="password-prompt" style="display: none;">
+          <h4>Verification Required</h4>
+          <p id="password-message">Please enter the password to confirm equipment status change:</p>
+          <input type="password" id="password-input" placeholder="Enter password">
+          <div class="password-actions">
+            <button type="button" class="btn btn-secondary" onclick="cancelPassword()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="verifyPassword()">Verify</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const equipmentData = {
+      "Fork Lift": { codes: ['FKL-051','FKL-052','FKL-053','FKL-054','FKL-055','FKL-056','FKL-057','FKL-058','FKL-059','FKL-060','FKL-063','FKL-064','FKL-065','FKL-066','FKL-067','FKL-068','FKL-069','FKL-070','FKL-071','FKL-072','FKL-073','FKL-074','FKL-075','FKL-076','FKL-077'], total: 25 },
+      "Front End Loader": { codes: ['FL-006','FL-007','FL-008','FL-009','FL-010','FL-011','FL-012','FL-013'], total: 8 },
+      "Dump Truck": { codes: ['TRU-061','TRU-062','TRU-063','TRU-064'], total: 4 },
+      "Fuel Bowser": { codes: ['TRU-066'], total: 1 },
+      "Lift Truck": { codes: ['TRU-065'], total: 1 },
+      "Slag Pot Carrier": { codes: ['SPC-001','SPC-002','SPC-003','SPC-004'], total: 4 },
+      "Excavator": { codes: ['EV-04'], total: 1 },
+      "Breaker Excavator": { codes: ['EV-05','EV-06'], total: 2 }
+    };
+
+    // Track current equipment being edited
+    let currentEquipment = {
+      code: '',
+      type: '',
+      status: 'available',
+      areaAssignment: '',
+      reportedDate: null
+    };
+
+    // Store equipment details
+    const equipmentDetails = {};
+
+    // Password for verification
+    const DOWN_STATUS_PASSWORD = "OCC-MEAID2025";
+
+    // Track the action requiring password
+    let passwordAction = ''; // 'down' or 'available'
+
+    function createBadges(codes, containerId) {
+      const container = document.getElementById(containerId);
+      codes.forEach(code => {
+        const badge = document.createElement('div');
+        // All equipment starts as available
+        const status = 'available';
+        badge.className = `badge ${status}-badge`;
+        badge.innerText = code;
+        badge.dataset.status = status;
+
+        // Initialize equipment details
+        if (!equipmentDetails[code]) {
+          equipmentDetails[code] = {
+            type: '',
+            status: status,
+            areaAssignment: '',
+            issueDetails: '',
+            reportedBy: '',
+            reportedDate: '',
+            verifiedBy: '',
+            verifiedDate: '',
+            daysDown: 0
+          };
+        } else {
+          equipmentDetails[code].status = status;
+        }
+
+        badge.onclick = () => {
+          // Set current equipment details
+          currentEquipment.code = code;
+          currentEquipment.status = equipmentDetails[code].status;
+          
+          // Find equipment type
+          for (const [type, data] of Object.entries(equipmentData)) {
+            if (data.codes.includes(code)) {
+              currentEquipment.type = type;
+              equipmentDetails[code].type = type;
+              break;
+            }
+          }
+          
+          // Open appropriate user form based on status
+          if (equipmentDetails[code].status === 'available') {
+            openAvailableForm();
+          } else if (equipmentDetails[code].status === 'reported') {
+            openReportedForm();
+          } else if (equipmentDetails[code].status === 'down') {
+            openDownForm();
+          }
+        };
+        container.appendChild(badge);
+      });
+    }
+
+    function filterBadges(status) {
+      const allBadges = document.querySelectorAll('.badge');
+      allBadges.forEach(badge => {
+        badge.style.display = (status === 'all' || badge.dataset.status === status)
+          ? 'flex' : 'none';
+      });
+    }
+
+    function updateAvailabilityTable() {
+      const tableBody = document.getElementById('table-body');
+      tableBody.innerHTML = '';
+
+      for (const [type, data] of Object.entries(equipmentData)) {
+        const badges = Array.from(document.querySelectorAll('.badge'))
+          .filter(b => data.codes.includes(b.innerText));
+
+        const availableCount = badges.filter(b => b.dataset.status === 'available').length;
+        const downCount = badges.filter(b => b.dataset.status === 'down').length;
+        const availability = ((availableCount / data.total) * 100).toFixed(1) + '%';
+
+        const row = `<tr>
+          <td>${type}</td>
+          <td>${data.total}</td>
+          <td>${availableCount}</td>
+          <td>${downCount}</td>
+          <td>${availability}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      }
+    }
+
+    // User Form Functions
+    function openAvailableForm() {
+      // Populate form with current equipment details
+      document.getElementById('mobileEquipmentType').value = currentEquipment.type;
+      document.getElementById('mobileEquipmentCode').value = currentEquipment.code;
+      document.getElementById('currentStatus').value = currentEquipment.status;
+      document.getElementById('currentAreaAssignment').value = equipmentDetails[currentEquipment.code].areaAssignment || '';
+      
+      // Set the current status as selected
+      const statusOptions = document.querySelectorAll('#available-status-options .status-option');
+      statusOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.status === currentEquipment.status) {
+          option.classList.add('selected');
+        }
+      });
+      
+      // Show the form
+      document.getElementById('userform-available').style.display = 'flex';
+    }
+
+    function closeUserForm(formType) {
+      document.getElementById(`userform-${formType}`).style.display = 'none';
+    }
+
+    function saveAvailableForm() {
+      // Get selected status
+      const selectedStatus = document.querySelector('#available-status-options .status-option.selected').dataset.status;
+      
+      // Update area assignment
+      const updateAreaAssignment = document.getElementById('updateAreaAssignment').value;
+      if (updateAreaAssignment) {
+        equipmentDetails[currentEquipment.code].areaAssignment = updateAreaAssignment;
+        document.getElementById('currentAreaAssignment').value = updateAreaAssignment;
+        document.getElementById('updateAreaAssignment').value = '';
+      }
+      
+      // Update the badge status if it changed
+      if (selectedStatus !== currentEquipment.status) {
+        updateBadgeStatus(currentEquipment.code, selectedStatus);
+        
+        // If status changed to reported, open reported form
+        if (selectedStatus === 'reported') {
+          closeUserForm('available');
+          openReportedForm();
+        } else {
+          // If status is still available, just close the form
+          closeUserForm('available');
+          alert('Equipment details updated successfully');
+        }
+      } else {
+        // If status didn't change, just close the form
+        closeUserForm('available');
+        alert('Equipment details updated successfully');
+      }
+    }
+
+    function openReportedForm() {
+      // Populate form with current equipment details
+      document.getElementById('mobileEquipmentTypeReported').value = currentEquipment.type;
+      document.getElementById('mobileEquipmentCodeReported').value = currentEquipment.code;
+      document.getElementById('currentStatusReported').value = currentEquipment.status;
+      document.getElementById('equipmentIssueDetails').value = equipmentDetails[currentEquipment.code].issueDetails || '';
+      document.getElementById('reportedBy').value = equipmentDetails[currentEquipment.code].reportedBy || '';
+      
+      // Set reported date to today if not set
+      const reportedDate = equipmentDetails[currentEquipment.code].reportedDate || new Date().toISOString().split('T')[0];
+      document.getElementById('reportedDate').value = reportedDate;
+      
+      // Set the current status as selected
+      const statusOptions = document.querySelectorAll('#reported-status-options .status-option');
+      statusOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.status === currentEquipment.status) {
+          option.classList.add('selected');
+        }
+      });
+      
+      // Show the form
+      document.getElementById('userform-reported').style.display = 'flex';
+    }
+
+    function saveReportedForm() {
+      // Get selected status
+      const selectedStatus = document.querySelector('#reported-status-options .status-option.selected').dataset.status;
+      
+      // Validate required fields
+      const issueDetails = document.getElementById('equipmentIssueDetails').value;
+      const reportedBy = document.getElementById('reportedBy').value;
+      const reportedDate = document.getElementById('reportedDate').value;
+      
+      if (!issueDetails || !reportedBy || !reportedDate) {
+        alert('Please fill in all required fields (Equipment Issue Details, Reported By, and Reported Date)');
+        return;
+      }
+      
+      // Save the details
+      equipmentDetails[currentEquipment.code].issueDetails = issueDetails;
+      equipmentDetails[currentEquipment.code].reportedBy = reportedBy;
+      equipmentDetails[currentEquipment.code].reportedDate = reportedDate;
+      
+      // Update the badge status if it changed
+      if (selectedStatus !== currentEquipment.status) {
+        updateBadgeStatus(currentEquipment.code, selectedStatus);
+        
+        // If status changed to available, clear reported details
+        if (selectedStatus === 'available') {
+          equipmentDetails[currentEquipment.code].issueDetails = '';
+          equipmentDetails[currentEquipment.code].reportedBy = '';
+          equipmentDetails[currentEquipment.code].reportedDate = '';
+          
+          closeUserForm('reported');
+          alert('Equipment status updated to Available. Reported details cleared.');
+        } 
+        // If status changed to down, open down form
+        else if (selectedStatus === 'down') {
+          closeUserForm('reported');
+          openDownForm();
+        }
+      } else {
+        // If status didn't change, just close the form
+        closeUserForm('reported');
+        alert('Equipment reported details updated successfully');
+      }
+    }
+
+    function openDownForm() {
+      // Populate form with current equipment details
+      document.getElementById('mobileEquipmentTypeDown').value = currentEquipment.type;
+      document.getElementById('mobileEquipmentCodeDown').value = currentEquipment.code;
+      document.getElementById('currentStatusDown').value = currentEquipment.status;
+      document.getElementById('verifiedEquipmentIssueDetails').value = equipmentDetails[currentEquipment.code].issueDetails || '';
+      document.getElementById('verifiedBy').value = equipmentDetails[currentEquipment.code].verifiedBy || '';
+      
+      // Set verified date to today if not set
+      const verifiedDate = equipmentDetails[currentEquipment.code].verifiedDate || new Date().toISOString().split('T')[0];
+      document.getElementById('verifiedDate').value = verifiedDate;
+      
+      // Calculate days down if we have a reported date
+      if (equipmentDetails[currentEquipment.code].reportedDate) {
+        const reported = new Date(equipmentDetails[currentEquipment.code].reportedDate);
+        const today = new Date();
+        const diffTime = Math.abs(today - reported);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        document.getElementById('daysDown').value = diffDays;
+        equipmentDetails[currentEquipment.code].daysDown = diffDays;
+      } else {
+        document.getElementById('daysDown').value = '1';
+        equipmentDetails[currentEquipment.code].daysDown = 1;
+      }
+      
+      // Set the current status as selected
+      const statusOptions = document.querySelectorAll('#down-status-options .status-option');
+      statusOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.status === currentEquipment.status) {
+          option.classList.add('selected');
+        }
+      });
+      
+      // Hide password prompt initially
+      document.getElementById('password-prompt').style.display = 'none';
+      
+      // Show the form
+      document.getElementById('userform-down').style.display = 'flex';
+    }
+
+    function saveDownForm() {
+      // Get selected status
+      const selectedStatus = document.querySelector('#down-status-options .status-option.selected').dataset.status;
+      
+      // Validate required fields
+      const verifiedIssueDetails = document.getElementById('verifiedEquipmentIssueDetails').value;
+      const verifiedBy = document.getElementById('verifiedBy').value;
+      const verifiedDate = document.getElementById('verifiedDate').value;
+      
+      if (!verifiedIssueDetails || !verifiedBy || !verifiedDate) {
+        alert('Please fill in all required fields (Verified Equipment Issue Details, Verified By, and Verified Date)');
+        return;
+      }
+      
+      // Set password action based on selected status
+      passwordAction = selectedStatus;
+      
+      // Show appropriate password message
+      if (selectedStatus === 'down') {
+        document.getElementById('password-message').textContent = 'Please enter the password to confirm equipment down status:';
+      } else if (selectedStatus === 'available') {
+        document.getElementById('password-message').textContent = 'Please enter the password to change equipment status from Down to Available:';
+      }
+      
+      // Show password prompt for verification
+      document.getElementById('password-prompt').style.display = 'block';
+    }
+
+    function verifyPassword() {
+      const passwordInput = document.getElementById('password-input').value;
+      
+      if (passwordInput === DOWN_STATUS_PASSWORD) {
+        // Password is correct, process the action
+        if (passwordAction === 'down') {
+          // Save the down details
+          const verifiedIssueDetails = document.getElementById('verifiedEquipmentIssueDetails').value;
+          const verifiedBy = document.getElementById('verifiedBy').value;
+          const verifiedDate = document.getElementById('verifiedDate').value;
+          
+          // Save the details
+          equipmentDetails[currentEquipment.code].issueDetails = verifiedIssueDetails;
+          equipmentDetails[currentEquipment.code].verifiedBy = verifiedBy;
+          equipmentDetails[currentEquipment.code].verifiedDate = verifiedDate;
+          
+          // Close the form
+          closeUserForm('down');
+          alert('Equipment down details updated successfully');
+        } else if (passwordAction === 'available') {
+          // Clear all issue details and set status to available
+          equipmentDetails[currentEquipment.code].issueDetails = '';
+          equipmentDetails[currentEquipment.code].reportedBy = '';
+          equipmentDetails[currentEquipment.code].reportedDate = '';
+          equipmentDetails[currentEquipment.code].verifiedBy = '';
+          equipmentDetails[currentEquipment.code].verifiedDate = '';
+          
+          // Update the badge status to available
+          updateBadgeStatus(currentEquipment.code, 'available');
+          
+          // Close the form
+          closeUserForm('down');
+          alert('Equipment status successfully changed to Available. All issue details cleared.');
+        }
+        
+        // Hide password prompt
+        document.getElementById('password-prompt').style.display = 'none';
+        document.getElementById('password-input').value = '';
+      } else {
+        alert('Incorrect password. Please try again.');
+        document.getElementById('password-input').value = '';
+        document.getElementById('password-input').focus();
+      }
+    }
+
+    function cancelPassword() {
+      // Hide password prompt
+      document.getElementById('password-prompt').style.display = 'none';
+      document.getElementById('password-input').value = '';
+    }
+
+    function updateBadgeStatus(code, status) {
+      // Find the badge with the given code
+      const allBadges = document.querySelectorAll('.badge');
+      allBadges.forEach(badge => {
+        if (badge.innerText === code) {
+          badge.dataset.status = status;
+          badge.className = `badge ${status}-badge`;
+          equipmentDetails[code].status = status;
+        }
+      });
+      
+      // Update the availability table
+      updateAvailabilityTable();
+    }
+
+    // Initialize status option selection
+    document.addEventListener('DOMContentLoaded', function() {
+      // Available form status options
+      const availableStatusOptions = document.querySelectorAll('#available-status-options .status-option');
+      availableStatusOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          availableStatusOptions.forEach(opt => opt.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+      
+      // Reported form status options
+      const reportedStatusOptions = document.querySelectorAll('#reported-status-options .status-option');
+      reportedStatusOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          reportedStatusOptions.forEach(opt => opt.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+      
+      // Down form status options
+      const downStatusOptions = document.querySelectorAll('#down-status-options .status-option');
+      downStatusOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          downStatusOptions.forEach(opt => opt.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    });
+
+    // Initialize dashboards
+    createBadges(equipmentData["Fork Lift"].codes, 'forklift-dashboard');
+    createBadges(equipmentData["Front End Loader"].codes, 'fel-dashboard');
+    createBadges(
+      [...equipmentData["Dump Truck"].codes, ...equipmentData["Fuel Bowser"].codes, ...equipmentData["Lift Truck"].codes],
+      'dumptruck-dashboard'
+    );
+    createBadges(equipmentData["Slag Pot Carrier"].codes, 'spc-dashboard');
+    createBadges([...equipmentData["Excavator"].codes, ...equipmentData["Breaker Excavator"].codes], 'excavator-dashboard');
+
+    updateAvailabilityTable();
+  </script>
+</body>
+</html>
